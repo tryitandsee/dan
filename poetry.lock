@@ -149,6 +149,14 @@ python = ">=3.4"
 version = ">=5.1.0"
 
 [[package]]
+category = "main"
+description = "A great way to get IPTCInfo"
+name = "iptcinfo3"
+optional = false
+python-versions = "*"
+version = "2.1.4"
+
+[[package]]
 category = "dev"
 description = "IPython: Productive Interactive Computing"
 marker = "python_version >= \"3.4\""
@@ -499,7 +507,7 @@ python-versions = "*"
 version = "0.2.5"
 
 [metadata]
-content-hash = "4481336e9979dba83b4502bd41329f0201112a6fb1ca6d5b82f3250642beb5f8"
+content-hash = "2db7569f95dbb08ca097ea44947099e01922bf5a9e186c4ac0b8882708651712"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -591,6 +599,10 @@ iniconfig = [
 ]
 ipdb = [
     {file = "ipdb-0.13.3.tar.gz", hash = "sha256:d6f46d261c45a65e65a2f7ec69288a1c511e16206edb2875e7ec6b2f66997e78"},
+]
+iptcinfo3 = [
+    {file = "IPTCInfo3-2.1.4-py3-none-any.whl", hash = "sha256:6a1b865ed531c4a431da3c349b16bd9a1085d1bcc1bf02f7ae40ec9b538f3e06"},
+    {file = "IPTCInfo3-2.1.4.tar.gz", hash = "sha256:e24f9ed345602425f6af37e4f9bbff6fec1e957081dd4fbc5af92a89f899c963"},
 ]
 ipython = [
     {file = "ipython-7.18.1-py3-none-any.whl", hash = "sha256:2e22c1f74477b5106a6fb301c342ab8c64bb75d702e350f05a649e8cb40a0fb8"},

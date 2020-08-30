@@ -1,11 +1,13 @@
 import os
 import dataclasses
 from dataclasses import dataclass
+from io import BytesIO
 from pprint import pprint
 from typing import List
 from urllib.parse import urlparse
 
 import requests
+from iptcinfo3 import IPTCInfo
 
 
 @dataclass
@@ -72,11 +74,12 @@ class Post:
         # retrieve file
         res = requests.get(self.file_url)
         if self.file_ext == "jpg":
-            pass
-            # set IPTC tags
+            f = BytesIO(res.content)
+            info = IPTCInfo(f, force=True, inp_charset="utf_8")
+            print(info)
+            # info.save_as("hmm.jpg")
         # set created/mtime
         # save
-        # print(res.content)
 
 
 def get_posts() -> List[Post]:

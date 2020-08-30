@@ -15,7 +15,7 @@ class PostFactory(factory.Factory):
     # large_file_url = factory.Faker("image_url")
     file_url = factory.Faker("image_url")
     file_size = 285415
-    file_ext = "png"
+    file_ext = "jpg"
     md5 = "22a63cecfd85ac0bb46b22bf5571ee3c"
     rating = "s"
     source = factory.Faker("url")
