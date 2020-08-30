@@ -39,18 +39,15 @@ class Post:
             if k in names:
                 setattr(self, k, v)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         tags = self.artists + self.characters
         if not tags:
-            return self.md5
+            return str(self.id)
 
         if self.artists and self.characters:
             return " ".join(self.artists) + " - " + " ".join(self.characters)
 
         return " ".join(self.artists + self.characters)
-
-    def __repr__(self) -> str:
-        return self.__str__()
 
     @property
     def artists(self) -> List[str]:
@@ -66,8 +63,23 @@ class Post:
 
         return []
 
+    def filename(self) -> str:
+        # TODO file length limit
+        return f"{self.id}.{self.file_ext}"
 
-def get_posts():
+    def download(self) -> None:
+        # if file exists: update tags or skip
+        # retrieve file
+        res = requests.get(self.file_url)
+        if self.file_ext == "jpg":
+            pass
+            # set IPTC tags
+        # set created/mtime
+        # save
+        # print(res.content)
+
+
+def get_posts() -> List[Post]:
     url = os.getenv("BOORU_URL")
     assert url
     url_bits = urlparse(url)

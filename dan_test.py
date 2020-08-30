@@ -1,5 +1,7 @@
 import factory
 
+import responses
+
 import dan
 
 
@@ -37,3 +39,15 @@ def test_post_artist():
     artists = post.artists
 
     assert artists == ["leonardo", "michelangelo", "raphael", "donatello"]
+
+
+@responses.activate
+def test_post_download():
+    responses.add(
+        responses.GET,
+        "https://example.com/foo.jpg",
+        open("./fixtures/horse.jpg", "rb").read(),
+    )
+    post = PostFactory(file_url="https://example.com/foo.jpg")
+
+    post.download()
