@@ -6,12 +6,24 @@ import requests
 
 
 class Post:
-    def __init__(self, data):
-        self.__dict__ = data
+    def __init__(self, data=None, **init_kwargs):
+        if data is None:
+            # TODO get Factory Boy to initialize w/ data
+            self.__dict__ = init_kwargs
+        else:
+            self.__dict__ = data
+
+    # def __str__(self):
+    # tag_string_artist tag_string_character tag_string_copyright
+
+    @property
+    def artists(self):
+        return self.tag_string_artist.split(" ")
 
 
-if __name__ == '__main__':
+def get_posts():
     url = os.getenv("BOORU_URL")
+    assert url
     url_bits = urlparse(url)
     res = requests.get(
         f"{url_bits.scheme}://{url_bits.hostname}/posts.json",
@@ -21,5 +33,9 @@ if __name__ == '__main__':
     if not res.ok:
         pprint(res.json())
 
+    return [Post(x) for x in res.json()]
 
-    pprint(res.json())
+
+if __name__ == "__main__":
+    posts = get_posts()
+    print(posts)
