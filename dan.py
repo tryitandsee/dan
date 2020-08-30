@@ -71,12 +71,21 @@ class Post:
 
     def download(self) -> None:
         # if file exists: update tags or skip
-        # retrieve file
         res = requests.get(self.file_url)
-        if self.file_ext == "jpg":
+        if self.file_ext == "jpgTODO":
             f = BytesIO(res.content)
             info = IPTCInfo(f, force=True, inp_charset="utf_8")
+            keywords = []
+            info["date-created"] = self.created_at
+            if len(self.artists) == 1:
+                # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
+                info["By-line"] = self.artists[0]
+            else:
+                keywords.extend(self.artists)
+            # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
             print(info)
+            # TODO strip keywords already in info['keywords']
+            info["keywords"].append(keywords)
             # info.save_as("hmm.jpg")
         # set created/mtime
         # save
