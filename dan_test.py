@@ -7,6 +7,7 @@ class PostFactory(factory.Factory):
     class Meta:
         model = dan.Post
 
+    id = factory.Faker("pyint")
     created_at = "2020-08-12T17:48:47.177-04:00"
     updated_at = "2020-08-11T23:55:27.535-04:00"
     # large_file_url = factory.Faker("image_url")
@@ -22,13 +23,10 @@ class PostFactory(factory.Factory):
     # tag_count_copyright = 0
     # tag_count_general = 0
     # tag_count_meta = 1
-    # combined tags from artist+character+copyright+general+meta
     tag_string = "tagme"
     tag_string_artist = ""
     tag_string_character = ""
-    # series/properties associated
     tag_string_copyright = "dragonball"
-    # freeform tags
     tag_string_general = ""
     tag_string_meta = "highres tagme"
 

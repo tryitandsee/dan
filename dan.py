@@ -1,19 +1,45 @@
 import os
+import dataclasses
+from dataclasses import dataclass
 from pprint import pprint
+from typing import List
 from urllib.parse import urlparse
 
 import requests
 
 
+@dataclass
 class Post:
-    def __init__(self, data=None, **init_kwargs):
-        if data is None:
-            # TODO get Factory Boy to initialize w/ data
-            self.__dict__ = init_kwargs
-        else:
-            self.__dict__ = data
+    id: int
+    created_at: str
+    updated_at: str
+    file_url: str
+    file_size: int
+    file_ext: str
+    md5: str
+    rating: str
+    source: str
+    # combined tags from artist+character+copyright+general+meta
+    tag_string: str
+    tag_string_artist: str
+    tag_string_character: str
+    # series/properties associated
+    tag_string_copyright: str
+    # freeform tags
+    tag_string_general: str
+    tag_string_meta: str
 
-    def __str__(self):
+    def __init__(self, **kwargs):
+        """
+        Ignore extra attrs we don't care about
+        https://stackoverflow.com/questions/54678337/how-does-one-ignore-extra-arguments-passed-to-a-data-class/54678706#54678706
+        """
+        names = set([f.name for f in dataclasses.fields(self)])
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)
+
+    def __str__(self) -> str:
         tags = self.artists + self.characters
         if not tags:
             return self.md5
@@ -23,18 +49,18 @@ class Post:
 
         return " ".join(self.artists + self.characters)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
     @property
-    def artists(self):
+    def artists(self) -> List[str]:
         if self.tag_string_artist:
             return self.tag_string_artist.split(" ")
 
         return []
 
     @property
-    def characters(self):
+    def characters(self) -> List[str]:
         if self.tag_string_character:
             return self.tag_string_character.split(" ")
 
@@ -53,7 +79,7 @@ def get_posts():
     if not res.ok:
         pprint(res.json())
 
-    return [Post(x) for x in res.json() if "file_url" in x]
+    return [Post(**x) for x in res.json() if "file_url" in x]
 
 
 if __name__ == "__main__":
