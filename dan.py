@@ -13,12 +13,32 @@ class Post:
         else:
             self.__dict__ = data
 
-    # def __str__(self):
-    # tag_string_artist tag_string_character tag_string_copyright
+    def __str__(self):
+        tags = self.artists + self.characters
+        if not tags:
+            return self.md5
+
+        if self.artists and self.characters:
+            return " ".join(self.artists) + " - " + " ".join(self.characters)
+
+        return " ".join(self.artists + self.characters)
+
+    def __repr__(self):
+        return self.__str__()
 
     @property
     def artists(self):
-        return self.tag_string_artist.split(" ")
+        if self.tag_string_artist:
+            return self.tag_string_artist.split(" ")
+
+        return []
+
+    @property
+    def characters(self):
+        if self.tag_string_character:
+            return self.tag_string_character.split(" ")
+
+        return []
 
 
 def get_posts():
@@ -33,7 +53,7 @@ def get_posts():
     if not res.ok:
         pprint(res.json())
 
-    return [Post(x) for x in res.json()]
+    return [Post(x) for x in res.json() if "file_url" in x]
 
 
 if __name__ == "__main__":
