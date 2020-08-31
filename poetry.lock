@@ -385,7 +385,7 @@ pytest = ">=2.6.4"
 watchdog = ">=0.6.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Extensions to the standard Python datetime module"
 name = "python-dateutil"
 optional = false
@@ -430,7 +430,7 @@ urllib3 = ">=1.25.10"
 tests = ["coverage (>=3.7.1,<6.0.0)", "pytest-cov", "pytest-localserver", "flake8", "pytest (>=4.6,<5.0)", "pytest (>=4.6)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python 2 and 3 compatibility utilities"
 name = "six"
 optional = false
@@ -507,7 +507,7 @@ python-versions = "*"
 version = "0.2.5"
 
 [metadata]
-content-hash = "2db7569f95dbb08ca097ea44947099e01922bf5a9e186c4ac0b8882708651712"
+content-hash = "23453f7126374cefc6d70c26e233d45beeae6a5471f48886db9e726e600e0d8d"
 python-versions = "^3.8"
 
 [metadata.files]

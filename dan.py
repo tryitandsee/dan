@@ -1,13 +1,16 @@
 import os
 import dataclasses
 from dataclasses import dataclass
+from glob import glob
 from io import BytesIO
 from pprint import pprint
-from typing import List
+from typing import List, Literal, Union
 from urllib.parse import urlparse
 
 import requests
 from iptcinfo3 import IPTCInfo
+
+DOWNLOAD_DIR = "./download"
 
 
 @dataclass
@@ -65,11 +68,24 @@ class Post:
 
         return []
 
+    @property
     def filename(self) -> str:
         # TODO file length limit
-        return f"{self.id}.{self.file_ext}"
+        return f"ID[{self.id}].{self.file_ext}"
+
+    def exists(self) -> Union[str, Literal[False]]:
+        """Have we downloaded this file already?"""
+        files = glob(f"{DOWNLOAD_DIR}/*ID[{self.id}].*")
+        if not files:
+            return False
+
+        return files[0]
 
     def download(self) -> None:
+        if self.exists():
+            print("skipping", self)
+            return
+
         # if file exists: update tags or skip
         res = requests.get(self.file_url)
         if self.file_ext == "jpgTODO":
@@ -87,6 +103,10 @@ class Post:
             # TODO strip keywords already in info['keywords']
             info["keywords"].append(keywords)
             # info.save_as("hmm.jpg")
+        with open(self.filename, "wb") as fh:
+            fh.write(res.content)
+            print("wrote", self, self.filename)
+        # os.utime(self.filename)
         # set created/mtime
         # save
 
