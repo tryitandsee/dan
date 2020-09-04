@@ -70,11 +70,21 @@ class Post:
         return []
 
     @property
+    def copyright(self) -> List[str]:
+        if self.tag_string_copyright:
+            return self.tag_string_copyright.split(" ")
+
+        return []
+
+    @property
     def filename(self) -> Path:
         # TODO copyright dir
         # TODO artists/characters in name
         # TODO file length limit
-        return DOWNLOAD_DIR / f"ID[{self.id}].{self.file_ext}"
+        base_dir = DOWNLOAD_DIR
+        if self.copyright:
+            base_dir = base_dir / self.copyright[0]
+        return base_dir / f"ID[{self.id}].{self.file_ext}"
 
     def exists(self) -> Union[Path, Literal[False]]:
         """Have we downloaded this file already?"""
@@ -89,8 +99,6 @@ class Post:
             print("skipping", self)
             return
 
-        DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
-        # if file exists: update tags or skip
         res = requests.get(self.file_url)
         if self.file_ext == "jpgTODO":
             f = BytesIO(res.content)
@@ -107,6 +115,9 @@ class Post:
             # TODO strip keywords already in info['keywords']
             info["keywords"].append(keywords)
             # info.save_as("hmm.jpg")
+        filename = self.filename
+        filename.parent.mkdir(parents=True, exist_ok=True)
+        # TODO if file exists: update tags or skip
         with open(self.filename, "wb") as fh:
             fh.write(res.content)
             print("wrote", self, self.filename)

@@ -7,6 +7,7 @@ import dan
 
 
 def setup_module(module):
+    # WISHLIST delete test_download and re-create
     dan.DOWNLOAD_DIR = Path("./test_download")
 
 
