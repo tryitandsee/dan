@@ -76,7 +76,7 @@ class Post:
         # TODO file length limit
         return DOWNLOAD_DIR / f"ID[{self.id}].{self.file_ext}"
 
-    def exists(self) -> Union[str, Literal[False]]:
+    def exists(self) -> Union[Path, Literal[False]]:
         """Have we downloaded this file already?"""
         files = list(DOWNLOAD_DIR.glob(f"**/*ID[{self.id}].*"))
         if not files:
@@ -89,6 +89,7 @@ class Post:
             print("skipping", self)
             return
 
+        DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
         # if file exists: update tags or skip
         res = requests.get(self.file_url)
         if self.file_ext == "jpgTODO":

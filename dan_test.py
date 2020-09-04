@@ -1,8 +1,13 @@
-import factory
+from pathlib import Path
 
+import factory
 import responses
 
 import dan
+
+
+def setup_module(module):
+    dan.DOWNLOAD_DIR = Path("./test_download")
 
 
 class PostFactory(factory.Factory):
