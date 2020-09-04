@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import requests
 from iptcinfo3 import IPTCInfo
 
+MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
 
 
@@ -76,6 +77,21 @@ class Post:
 
         return []
 
+    def get_name(self, artists: List[str], characters: List[str]):
+        artists_str = "".join([f"[{x}]" for x in artists])
+        characters_str = "".join(f"[{x}]" for x in characters)
+
+        if artists_str and characters_str:
+            return f"{artists_str} - {characters_str} ID[{self.id}].{self.file_ext}"
+
+        if artists_str and not characters_str:
+            return f"{artists_str} ID[{self.id}].{self.file_ext}"
+
+        if not artists_str and characters_str:
+            return f"{characters_str} ID[{self.id}].{self.file_ext}"
+
+        return f"ID[{self.id}].{self.file_ext}"
+
     @property
     def filename(self) -> Path:
         # TODO artists/characters in name
@@ -89,6 +105,16 @@ class Post:
 
         if series:
             base_dir = base_dir / series
+
+        artists = self.artists.copy()
+        characters = self.characters.copy()
+        name = f"ID[{self.id}].{self.file_ext}"
+        while len(name) < MAX_FILENAME and (artists or characters):
+            if artists:
+                name = []
+
+        #     pass
+
         return base_dir / f"ID[{self.id}].{self.file_ext}"
 
     def exists(self) -> Union[Path, Literal[False]]:

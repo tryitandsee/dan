@@ -48,6 +48,38 @@ def test_post_artist():
     assert artists == ["leonardo", "michelangelo", "raphael", "donatello"]
 
 
+def test_get_name_no_artist_no_char():
+    post = PostFactory(id=42)
+
+    name = post.get_name([], [])
+
+    assert name == "ID[42].jpg"
+
+
+def test_get_name_with_artist_no_char():
+    post = PostFactory(id=42)
+
+    name = post.get_name(["leonardo", "michelangelo"], [])
+
+    assert name == "[leonardo][michelangelo] ID[42].jpg"
+
+
+def test_get_name_no_artist_with_char():
+    post = PostFactory(id=42)
+
+    name = post.get_name([], ["raphael", "donatello"])
+
+    assert name == "[raphael][donatello] ID[42].jpg"
+
+
+def test_get_name_with_artist_with_char():
+    post = PostFactory(id=42)
+
+    name = post.get_name(["leonardo", "michelangelo"], ["raphael", "donatello"])
+
+    assert name == "[leonardo][michelangelo] - [raphael][donatello] ID[42].jpg"
+
+
 @responses.activate
 def test_post_download():
     responses.add(
