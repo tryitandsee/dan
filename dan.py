@@ -77,7 +77,8 @@ class Post:
 
         return []
 
-    def get_name(self, artists: List[str], characters: List[str]):
+    def get_name(self, artists: List[str], characters: List[str]) -> str:
+        """Generate a possible filename to fix MAX_FILENAME"""
         artists_str = "".join([f"[{x}]" for x in artists])
         characters_str = "".join(f"[{x}]" for x in characters)
 
@@ -92,10 +93,12 @@ class Post:
 
         return f"ID[{self.id}].{self.file_ext}"
 
-    @property
-    def filename(self) -> Path:
-        # TODO artists/characters in name
-        # TODO file length limit
+    def get_file_save_path(self) -> Path:
+        """
+        Find a file name that fits within MAX_FILENAME and return it's path
+
+        WISHLIST templated file paths like "%s/%aa - %cc"
+        """
         base_dir = DOWNLOAD_DIR
         series = None
         if self.copyright:
@@ -106,20 +109,30 @@ class Post:
         if series:
             base_dir = base_dir / series
 
-        artists = self.artists.copy()
-        characters = self.characters.copy()
-        name = f"ID[{self.id}].{self.file_ext}"
-        while len(name) < MAX_FILENAME and (artists or characters):
-            if artists:
-                name = []
+        artists_src = self.artists.copy()
+        characters_src = self.characters.copy()
+        artists_dst: List[str] = []
+        characters_dst: List[str] = []
+        while len(self.get_name(artists_dst, characters_dst)) < MAX_FILENAME and (
+            artists_src or characters_src
+        ):
+            if artists_src:
+                artists_dst.append(artists_src.pop(0))
+                if len(self.get_name(artists_dst, characters_dst)) > MAX_FILENAME:
+                    artists_dst.pop()
+                    break
 
-        #     pass
+            if characters_src:
+                characters_dst.append(characters_src.pop(0))
+                if len(self.get_name(artists_dst, characters_dst)) > MAX_FILENAME:
+                    characters_dst.pop()
+                    break
 
-        return base_dir / f"ID[{self.id}].{self.file_ext}"
+        return base_dir / self.get_name(artists_dst, characters_dst)
 
     def exists(self) -> Union[Path, Literal[False]]:
         """Have we downloaded this file already?"""
-        files = list(DOWNLOAD_DIR.glob(f"**/*ID[{self.id}].*"))
+        files = list(DOWNLOAD_DIR.glob(f"**/*ID[{self.id}].{self.file_ext}"))
         if not files:
             return False
 
@@ -146,15 +159,14 @@ class Post:
             # TODO strip keywords already in info['keywords']
             info["keywords"].append(keywords)
             # info.save_as("hmm.jpg")
-        filename = self.filename
-        filename.parent.mkdir(parents=True, exist_ok=True)
+        file_save_path = self.get_file_save_path()
+        file_save_path.parent.mkdir(parents=True, exist_ok=True)
         # TODO if file exists: update tags or skip
-        with open(self.filename, "wb") as fh:
+        with open(file_save_path, "wb") as fh:
             fh.write(res.content)
-            print("wrote", self, self.filename)
-        # os.utime(self.filename)
+            print("wrote", self, file_save_path)
         # set created/mtime
-        # save
+        # os.utime(file_save_path)
 
 
 def get_posts() -> List[Post]:

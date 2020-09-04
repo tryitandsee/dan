@@ -80,6 +80,18 @@ def test_get_name_with_artist_with_char():
     assert name == "[leonardo][michelangelo] - [raphael][donatello] ID[42].jpg"
 
 
+def test_get_file_save_path():
+    post = PostFactory(
+        tag_string_artist=" ".join(factory.Faker("words", nb=80).generate()),
+        tag_string_character=" ".join(factory.Faker("words", nb=80).generate()),
+    )
+
+    save_path = post.get_file_save_path()
+
+    assert len(save_path.name) > 80
+    assert len(save_path.name) <= dan.MAX_FILENAME
+
+
 @responses.activate
 def test_post_download():
     responses.add(
