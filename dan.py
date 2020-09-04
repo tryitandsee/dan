@@ -78,12 +78,17 @@ class Post:
 
     @property
     def filename(self) -> Path:
-        # TODO copyright dir
         # TODO artists/characters in name
         # TODO file length limit
         base_dir = DOWNLOAD_DIR
+        series = None
         if self.copyright:
-            base_dir = base_dir / self.copyright[0]
+            for series in reversed(self.copyright):
+                if (DOWNLOAD_DIR / series).is_dir():
+                    break
+
+        if series:
+            base_dir = base_dir / series
         return base_dir / f"ID[{self.id}].{self.file_ext}"
 
     def exists(self) -> Union[Path, Literal[False]]:

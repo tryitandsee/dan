@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import factory
@@ -7,8 +8,8 @@ import dan
 
 
 def setup_module(module):
-    # WISHLIST delete test_download and re-create
     dan.DOWNLOAD_DIR = Path("./test_download")
+    shutil.rmtree(dan.DOWNLOAD_DIR, ignore_errors=True)
 
 
 class PostFactory(factory.Factory):
@@ -57,3 +58,20 @@ def test_post_download():
     post = PostFactory(file_url="https://example.com/foo.jpg")
 
     post.download()
+
+
+@responses.activate
+def test_post_download_uses_existing_copyright_Dir():
+    responses.add(
+        responses.GET,
+        "https://example.com/foo.jpg",
+        open("./fixtures/horse.jpg", "rb").read(),
+    )
+    post = PostFactory(
+        file_url="https://example.com/foo.jpg", tag_string_copyright="foo dragonball"
+    )
+    (dan.DOWNLOAD_DIR / "dragonball").mkdir(exist_ok=True)
+
+    post.download()
+
+    assert (dan.DOWNLOAD_DIR / "foo").exists() == False
