@@ -3,6 +3,7 @@ import dataclasses
 from dataclasses import dataclass
 from glob import glob
 from io import BytesIO
+from pathlib import Path
 from pprint import pprint
 from typing import List, Literal, Union
 from urllib.parse import urlparse
@@ -10,7 +11,7 @@ from urllib.parse import urlparse
 import requests
 from iptcinfo3 import IPTCInfo
 
-DOWNLOAD_DIR = "./download"
+DOWNLOAD_DIR = Path("./download")
 
 
 @dataclass
@@ -69,13 +70,15 @@ class Post:
         return []
 
     @property
-    def filename(self) -> str:
+    def filename(self) -> Path:
+        # TODO copyright dir
+        # TODO artists/characters in name
         # TODO file length limit
-        return f"ID[{self.id}].{self.file_ext}"
+        return DOWNLOAD_DIR / f"ID[{self.id}].{self.file_ext}"
 
     def exists(self) -> Union[str, Literal[False]]:
         """Have we downloaded this file already?"""
-        files = glob(f"{DOWNLOAD_DIR}/*ID[{self.id}].*")
+        files = list(DOWNLOAD_DIR.glob(f"**/*ID[{self.id}].*"))
         if not files:
             return False
 
