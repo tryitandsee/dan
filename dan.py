@@ -5,6 +5,7 @@ from glob import glob
 from io import BytesIO
 from pathlib import Path
 from pprint import pprint
+from time import sleep
 from typing import List, Literal, Union
 from urllib.parse import urlparse
 
@@ -170,14 +171,18 @@ class Post:
         # os.utime(file_save_path)
 
 
-def get_posts() -> List[Post]:
+def get_posts(page_number=1) -> List[Post]:
     url = os.getenv("BOORU_URL")
     assert url
     url_bits = urlparse(url)
     res = requests.get(
         f"{url_bits.scheme}://{url_bits.hostname}/posts.json",
         auth=(url_bits.username, url_bits.password),
-        params={"tags": f"ordfav:{url_bits.username}"},
+        params={
+            "tags": f"ordfav:{url_bits.username}",
+            "page": page_number,
+            "limit": 200,
+        },
     )
     if not res.ok:
         pprint(res.json())
@@ -189,3 +194,4 @@ if __name__ == "__main__":
     posts = get_posts()
     for post in posts:
         post.download()
+        sleep(1)
