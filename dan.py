@@ -132,7 +132,7 @@ class Post:
 
     def exists(self) -> Union[Path, Literal[False]]:
         """Have we downloaded this file already?"""
-        files = list(DOWNLOAD_DIR.glob(f"**/*ID[{self.id}].{self.file_ext}"))
+        files = list(DOWNLOAD_DIR.glob(f"**/*ID[[]{self.id}[]].{self.file_ext}"))
         if not files:
             return False
 
@@ -141,6 +141,7 @@ class Post:
     def download(self) -> None:
         if self.exists():
             print("skipping", self)
+            # TODO if get_file_save_path() != existing then rename
             return
 
         res = requests.get(self.file_url)
@@ -176,7 +177,7 @@ def get_posts() -> List[Post]:
     res = requests.get(
         f"{url_bits.scheme}://{url_bits.hostname}/posts.json",
         auth=(url_bits.username, url_bits.password),
-        params={"order": f"ordfav:{url_bits.username}"},
+        params={"tags": f"ordfav:{url_bits.username}"},
     )
     if not res.ok:
         pprint(res.json())
@@ -188,4 +189,3 @@ if __name__ == "__main__":
     posts = get_posts()
     for post in posts:
         post.download()
-        # print(post.get_file_save_path())

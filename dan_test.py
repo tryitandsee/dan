@@ -61,7 +61,7 @@ def test_get_name_with_artist_no_char():
 
     name = post.get_name(["leonardo", "michelangelo"], [])
 
-    assert name == "[leonardo][michelangelo] ID[42].jpg"
+    assert name == "leonardo michelangelo ID[42].jpg"
 
 
 def test_get_name_no_artist_with_char():
@@ -69,7 +69,7 @@ def test_get_name_no_artist_with_char():
 
     name = post.get_name([], ["raphael", "donatello"])
 
-    assert name == "[raphael][donatello] ID[42].jpg"
+    assert name == "raphael donatello ID[42].jpg"
 
 
 def test_get_name_with_artist_with_char():
@@ -77,7 +77,7 @@ def test_get_name_with_artist_with_char():
 
     name = post.get_name(["leonardo", "michelangelo"], ["raphael", "donatello"])
 
-    assert name == "[leonardo][michelangelo] - [raphael][donatello] ID[42].jpg"
+    assert name == "leonardo michelangelo - raphael donatello ID[42].jpg"
 
 
 def test_get_file_save_path():
@@ -105,7 +105,7 @@ def test_post_download():
 
 
 @responses.activate
-def test_post_download_uses_existing_copyright_Dir():
+def test_post_download_uses_existing_copyright_dir():
     responses.add(
         responses.GET,
         "https://example.com/foo.jpg",
@@ -114,7 +114,7 @@ def test_post_download_uses_existing_copyright_Dir():
     post = PostFactory(
         file_url="https://example.com/foo.jpg", tag_string_copyright="foo dragonball"
     )
-    (dan.DOWNLOAD_DIR / "dragonball").mkdir(exist_ok=True)
+    (dan.DOWNLOAD_DIR / "dragonball").mkdir(parents=True, exist_ok=True)
 
     post.download()
 
