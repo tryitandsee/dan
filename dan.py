@@ -149,14 +149,17 @@ class Post:
           file_path, created
         """
         existing_file = self.exists()
+        file_save_path = self.get_file_save_path()
+        file_save_path.parent.mkdir(parents=True, exist_ok=True)
         if existing_file:
-            # TODO if get_file_save_path() != existing_file then rename
+            if file_save_path != existing_file:
+                existing_file.rename(file_save_path)
             created_at = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
             created_at_sec = time.mktime(created_at.utctimetuple()) + utc_offset
             updated_at = dt.datetime.strptime(self.updated_at, "%Y-%m-%dT%H:%M:%S.%f%z")
             updated_at_sec = time.mktime(updated_at.utctimetuple()) + utc_offset
-            os.utime(existing_file, times=(created_at_sec, updated_at_sec))
-            return existing_file, False
+            os.utime(file_save_path, times=(created_at_sec, updated_at_sec))
+            return file_save_path, False
 
         res = requests.get(self.file_url)
         if self.file_ext == "jpgTODO":
@@ -174,8 +177,6 @@ class Post:
             # TODO strip keywords already in info['keywords']
             info["keywords"].append(keywords)
             # info.save_as("hmm.jpg")
-        file_save_path = self.get_file_save_path()
-        file_save_path.parent.mkdir(parents=True, exist_ok=True)
         # TODO if file exists: update tags or skip
         with open(file_save_path, "wb") as fh:
             fh.write(res.content)
