@@ -77,7 +77,7 @@ def test_get_name_with_artist_with_char():
 
     name = post.get_name(["leonardo", "michelangelo"], ["raphael", "donatello"])
 
-    assert name == "leonardo michelangelo - raphael donatello ID[42].jpg"
+    assert name == "raphael donatello - leonardo michelangelo ID[42].jpg"
 
 
 def test_get_file_save_path():

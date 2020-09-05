@@ -92,7 +92,7 @@ class Post:
         characters_str = " ".join(characters)
 
         if artists_str and characters_str:
-            return f"{artists_str} - {characters_str} ID[{self.id}].{self.file_ext}"
+            return f"{characters_str} - {artists_str} ID[{self.id}].{self.file_ext}"
 
         if artists_str and not characters_str:
             return f"{artists_str} ID[{self.id}].{self.file_ext}"
