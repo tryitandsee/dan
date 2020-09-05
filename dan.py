@@ -1,3 +1,4 @@
+import argparse
 import datetime as dt
 import os
 import dataclasses
@@ -17,6 +18,10 @@ MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
 
 utc_offset = time.localtime().tm_gmtoff
+parser = argparse.ArgumentParser(description="Download booru")
+parser.add_argument(
+    "--page", type=int, default=1, help="What page to start at (default: 1)"
+)
 
 
 @dataclass
@@ -209,13 +214,14 @@ def get_posts(page_number=1) -> List[Post]:
 
 
 if __name__ == "__main__":
-    page_number = 1
+    args = parser.parse_args()
+    page_number = args.page
     while True:
         posts = get_posts(page_number)
         for post in posts:
             local_path, created = post.download()
             if created:
-                time.sleep(10)
+                time.sleep(2)
             print(page_number, "saved" if created else "skip ", local_path)
         page_number += 1
         if not posts:
