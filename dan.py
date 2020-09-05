@@ -209,9 +209,14 @@ def get_posts(page_number=1) -> List[Post]:
 
 
 if __name__ == "__main__":
-    posts = get_posts()
-    for post in posts:
-        local_path, created = post.download()
-        if created:
-            time.sleep(1)
-        print("saved" if created else "skip ", local_path)
+    page_number = 1
+    while True:
+        posts = get_posts(page_number)
+        for post in posts:
+            local_path, created = post.download()
+            if created:
+                time.sleep(10)
+            print(page_number, "saved" if created else "skip ", local_path)
+        page_number += 1
+        if not posts:
+            break
