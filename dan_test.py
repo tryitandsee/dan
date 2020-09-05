@@ -119,3 +119,19 @@ def test_post_download_uses_existing_copyright_dir():
     post.download()
 
     assert (dan.DOWNLOAD_DIR / "foo").exists() == False
+
+
+@responses.activate
+def test_post_download_handles_slash_in_name():
+    responses.add(
+        responses.GET,
+        "https://example.com/foo.jpg",
+        open("./fixtures/horse.jpg", "rb").read(),
+    )
+    post = PostFactory(
+        file_url="https://example.com/foo.jpg", tag_string_copyright="a/b"
+    )
+
+    post.download()
+
+    assert (dan.DOWNLOAD_DIR / "a_b").exists()

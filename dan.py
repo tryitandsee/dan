@@ -63,21 +63,21 @@ class Post:
     @property
     def artists(self) -> List[str]:
         if self.tag_string_artist:
-            return self.tag_string_artist.split(" ")
+            return self.tag_string_artist.replace("/", "_").split(" ")
 
         return []
 
     @property
     def characters(self) -> List[str]:
         if self.tag_string_character:
-            return self.tag_string_character.split(" ")
+            return self.tag_string_character.replace("/", "_").split(" ")
 
         return []
 
     @property
     def copyright(self) -> List[str]:
         if self.tag_string_copyright:
-            return self.tag_string_copyright.split(" ")
+            return self.tag_string_copyright.replace("/", "_").split(" ")
 
         return []
 
