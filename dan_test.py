@@ -17,8 +17,8 @@ class PostFactory(factory.Factory):
         model = dan.Post
 
     id = factory.Faker("pyint")
-    created_at = "2020-08-12T17:48:47.177-04:00"
-    updated_at = "2020-08-11T23:55:27.535-04:00"
+    created_at = "2020-08-10T17:48:47.177-04:00"
+    updated_at = "2020-08-15T23:55:27.535-04:00"
     # large_file_url = factory.Faker("image_url")
     file_url = factory.Faker("image_url")
     file_size = 285415

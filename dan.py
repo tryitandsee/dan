@@ -1,11 +1,12 @@
+import datetime as dt
 import os
 import dataclasses
+import time
 from dataclasses import dataclass
 from glob import glob
 from io import BytesIO
 from pathlib import Path
 from pprint import pprint
-from time import sleep
 from typing import List, Literal, Tuple, Union
 from urllib.parse import urlparse
 
@@ -14,6 +15,8 @@ from iptcinfo3 import IPTCInfo
 
 MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
+
+utc_offset = time.localtime().tm_gmtoff
 
 
 @dataclass
@@ -148,6 +151,11 @@ class Post:
         existing_file = self.exists()
         if existing_file:
             # TODO if get_file_save_path() != existing_file then rename
+            created_at = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+            created_at_sec = time.mktime(created_at.utctimetuple()) + utc_offset
+            updated_at = dt.datetime.strptime(self.updated_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+            updated_at_sec = time.mktime(updated_at.utctimetuple()) + utc_offset
+            os.utime(existing_file, times=(created_at_sec, updated_at_sec))
             return existing_file, False
 
         res = requests.get(self.file_url)
@@ -171,8 +179,12 @@ class Post:
         # TODO if file exists: update tags or skip
         with open(file_save_path, "wb") as fh:
             fh.write(res.content)
-        # TODO set created/mtime
-        # os.utime(file_save_path)
+
+        created_at = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+        created_at_sec = time.mktime(created_at.utctimetuple()) + utc_offset
+        updated_at = dt.datetime.strptime(self.updated_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+        updated_at_sec = time.mktime(updated_at.utctimetuple()) + utc_offset
+        os.utime(file_save_path, times=(created_at_sec, updated_at_sec))
         return file_save_path, True
 
 
@@ -200,5 +212,5 @@ if __name__ == "__main__":
     for post in posts:
         local_path, created = post.download()
         if created:
-            sleep(1)
+            time.sleep(1)
         print("saved" if created else "skip ", local_path)
