@@ -6,7 +6,7 @@ from io import BytesIO
 from pathlib import Path
 from pprint import pprint
 from time import sleep
-from typing import List, Literal, Union
+from typing import List, Literal, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
@@ -139,11 +139,16 @@ class Post:
 
         return files[0]
 
-    def download(self) -> None:
-        if self.exists():
-            print("skipping", self)
-            # TODO if get_file_save_path() != existing then rename
-            return
+    def download(self) -> Tuple[Path, bool]:
+        """
+        Returns
+        -------
+          file_path, created
+        """
+        existing_file = self.exists()
+        if existing_file:
+            # TODO if get_file_save_path() != existing_file then rename
+            return existing_file, False
 
         res = requests.get(self.file_url)
         if self.file_ext == "jpgTODO":
@@ -166,9 +171,9 @@ class Post:
         # TODO if file exists: update tags or skip
         with open(file_save_path, "wb") as fh:
             fh.write(res.content)
-            print("wrote", self, file_save_path)
-        # set created/mtime
+        # TODO set created/mtime
         # os.utime(file_save_path)
+        return file_save_path, True
 
 
 def get_posts(page_number=1) -> List[Post]:
@@ -193,5 +198,7 @@ def get_posts(page_number=1) -> List[Post]:
 if __name__ == "__main__":
     posts = get_posts()
     for post in posts:
-        post.download()
-        sleep(1)
+        local_path, created = post.download()
+        if created:
+            sleep(1)
+        print("saved" if created else "skip ", local_path)
