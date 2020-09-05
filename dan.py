@@ -79,8 +79,8 @@ class Post:
 
     def get_name(self, artists: List[str], characters: List[str]) -> str:
         """Generate a possible filename to fix MAX_FILENAME"""
-        artists_str = "".join([f"[{x}]" for x in artists])
-        characters_str = "".join(f"[{x}]" for x in characters)
+        artists_str = " ".join(artists)
+        characters_str = " ".join(characters)
 
         if artists_str and characters_str:
             return f"{artists_str} - {characters_str} ID[{self.id}].{self.file_ext}"
@@ -186,4 +186,6 @@ def get_posts() -> List[Post]:
 
 if __name__ == "__main__":
     posts = get_posts()
-    print(posts)
+    for post in posts:
+        post.download()
+        # print(post.get_file_save_path())
