@@ -158,6 +158,31 @@ class Post:
 
         return files[0]
 
+    def sync_iptc(self, file_path: Path) -> None:
+        """
+        Sync metadata to file.
+
+        Take in a file path because there's no guarantee file is at
+        self.get_file_save_path()
+        """
+        if self.file_ext not in ("jpg", "jpeg"):
+            return
+
+        # NOTE: we can't use inp_charset="utf_8"
+        info = IPTCInfo(file_path, force=True)
+        # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+        # if len(self.artists) == 1:
+        #     # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
+        #     info["By-line"] = self.artists[0]
+        # else:
+        #     keywords.extend(self.artists)
+        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
+        print(info["keywords"])
+        # TODO strip keywords already in info['keywords']
+        # info["keywords"].append(keywords)
+        # info.save_as("hmm.jpg")
+        # TODO if file exists: update tags or skip
+
     def download(self) -> Tuple[Path, bool]:
         """
         Returns
@@ -170,6 +195,7 @@ class Post:
         if existing_file:
             if file_save_path != existing_file:
                 existing_file.rename(file_save_path)
+            self.sync_iptc(file_save_path)
             created_at = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
             created_at_sec = time.mktime(created_at.utctimetuple()) + utc_offset
             updated_at = dt.datetime.strptime(self.updated_at, "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -178,25 +204,9 @@ class Post:
             return file_save_path, False
 
         res = requests.get(self.file_url)
-        if self.file_ext == "jpgTODO":
-            f = BytesIO(res.content)
-            info = IPTCInfo(f, force=True, inp_charset="utf_8")
-            keywords = []
-            info["date-created"] = self.created_at
-            if len(self.artists) == 1:
-                # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
-                info["By-line"] = self.artists[0]
-            else:
-                keywords.extend(self.artists)
-            # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
-            print(info)
-            # TODO strip keywords already in info['keywords']
-            info["keywords"].append(keywords)
-            # info.save_as("hmm.jpg")
-        # TODO if file exists: update tags or skip
         with open(file_save_path, "wb") as fh:
             fh.write(res.content)
-
+        self.sync_iptc(file_save_path)
         created_at = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
         created_at_sec = time.mktime(created_at.utctimetuple()) + utc_offset
         updated_at = dt.datetime.strptime(self.updated_at, "%Y-%m-%dT%H:%M:%S.%f%z")
