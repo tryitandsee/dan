@@ -13,7 +13,8 @@ from typing import List, Literal, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
-from iptcinfo3 import IPTCInfo
+from libxmp.consts import XMP_NS_XMP
+from libxmp.utils import file_to_dict
 
 MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
@@ -165,19 +166,18 @@ class Post:
         Take in a file path because there's no guarantee file is at
         self.get_file_save_path()
         """
-        if self.file_ext not in ("jpg", "jpeg"):
-            return
+        xmp = file_to_dict(str(file_path))
 
-        # NOTE: we can't use inp_charset="utf_8"
-        info = IPTCInfo(file_path, force=True)
+        if XMP_NS_XMP not in xmp:
+            meta = {}
+        else:
+            meta = {key: value for key, value, options in xmp[XMP_NS_XMP]}
+        print(meta)
+        # if self.file_ext not in ("jpg", "jpeg"):
+        #     return
+
         # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
-        # if len(self.artists) == 1:
-        #     # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
-        #     info["By-line"] = self.artists[0]
-        # else:
-        #     keywords.extend(self.artists)
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
-        print(info["keywords"])
         # TODO strip keywords already in info['keywords']
         # info["keywords"].append(keywords)
         # info.save_as("hmm.jpg")

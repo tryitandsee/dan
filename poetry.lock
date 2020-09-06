@@ -187,14 +187,6 @@ python = ">=3.4"
 version = ">=5.1.0"
 
 [[package]]
-category = "main"
-description = "A great way to get IPTCInfo"
-name = "iptcinfo3"
-optional = false
-python-versions = "*"
-version = "2.1.4"
-
-[[package]]
 category = "dev"
 description = "IPython: Productive Interactive Computing"
 marker = "python_version >= \"3.4\""
@@ -466,6 +458,25 @@ version = "2.8.1"
 six = ">=1.5"
 
 [[package]]
+category = "main"
+description = "Python XMP Toolkit for working with metadata."
+name = "python-xmp-toolkit"
+optional = false
+python-versions = "*"
+version = "2.0.1"
+
+[package.dependencies]
+pytz = "*"
+
+[[package]]
+category = "main"
+description = "World timezone definitions, modern and historical"
+name = "pytz"
+optional = false
+python-versions = "*"
+version = "2020.1"
+
+[[package]]
 category = "dev"
 description = "Alternative regular expression module, to replace re."
 name = "regex"
@@ -601,7 +612,7 @@ python-versions = "*"
 version = "0.2.5"
 
 [metadata]
-content-hash = "204c1db29ddd60c51754ee32057c30e7911bb80179aca1d1aac396accbac0fe3"
+content-hash = "4fbc4bd04b4587bc01a8a03f72f0e0c2562edfc16bbafaf7147e4514db47f419"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -706,10 +717,6 @@ iniconfig = [
 ipdb = [
     {file = "ipdb-0.13.3.tar.gz", hash = "sha256:d6f46d261c45a65e65a2f7ec69288a1c511e16206edb2875e7ec6b2f66997e78"},
 ]
-iptcinfo3 = [
-    {file = "IPTCInfo3-2.1.4-py3-none-any.whl", hash = "sha256:6a1b865ed531c4a431da3c349b16bd9a1085d1bcc1bf02f7ae40ec9b538f3e06"},
-    {file = "IPTCInfo3-2.1.4.tar.gz", hash = "sha256:e24f9ed345602425f6af37e4f9bbff6fec1e957081dd4fbc5af92a89f899c963"},
-]
 ipython = [
     {file = "ipython-7.18.1-py3-none-any.whl", hash = "sha256:2e22c1f74477b5106a6fb301c342ab8c64bb75d702e350f05a649e8cb40a0fb8"},
     {file = "ipython-7.18.1.tar.gz", hash = "sha256:a331e78086001931de9424940699691ad49dfb457cea31f5471eae7b78222d5e"},
@@ -807,6 +814,13 @@ pytest-watch = [
 python-dateutil = [
     {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},
     {file = "python_dateutil-2.8.1-py2.py3-none-any.whl", hash = "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"},
+]
+python-xmp-toolkit = [
+    {file = "python-xmp-toolkit-2.0.1.tar.gz", hash = "sha256:f8d912946ff9fd46ed5c7c355aa5d4ea193328b3f200909ef32d9a28a1419a38"},
+]
+pytz = [
+    {file = "pytz-2020.1-py2.py3-none-any.whl", hash = "sha256:a494d53b6d39c3c6e44c3bec237336e14305e4f29bbf800b599253057fbb79ed"},
+    {file = "pytz-2020.1.tar.gz", hash = "sha256:c35965d010ce31b23eeb663ed3cc8c906275d6be1a34393a1d73a41febf4a048"},
 ]
 regex = [
     {file = "regex-2020.7.14-cp27-cp27m-win32.whl", hash = "sha256:e46d13f38cfcbb79bfdb2964b0fe12561fe633caf964a77a5f8d4e45fe5d2ef7"},
