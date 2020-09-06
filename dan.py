@@ -23,6 +23,11 @@ parser = argparse.ArgumentParser(description="Download booru")
 parser.add_argument(
     "--page", type=int, default=1, help="What page to start at (default: 1)"
 )
+parser.add_argument(
+    "--fast-update",
+    action="store_true",
+    help="Stop pagination when we see a post again",
+)
 
 
 @dataclass
@@ -217,13 +222,18 @@ def get_posts(page_number=1) -> List[Post]:
 if __name__ == "__main__":
     args = parser.parse_args()
     page_number = args.page
+    post_seen_again = False
     while True:
         posts = get_posts(page_number)
         for post in posts:
             local_path, created = post.download()
             if created:
                 time.sleep(2)
+            else:
+                post_seen_again = True
             print(page_number, "saved" if created else "skip ", local_path)
         page_number += 1
+        if args.fast_update and post_seen_again:
+            break
         if not posts:
             break
