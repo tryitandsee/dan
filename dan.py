@@ -13,8 +13,8 @@ from typing import List, Literal, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
-from libxmp.consts import XMP_NS_XMP
-from libxmp.utils import file_to_dict
+from libxmp.consts import XMP_NS_DC
+from libxmp import XMPError, XMPFiles
 
 MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
@@ -166,15 +166,25 @@ class Post:
         Take in a file path because there's no guarantee file is at
         self.get_file_save_path()
         """
-        xmp = file_to_dict(str(file_path))
+        if self.file_ext not in ("jpg", "jpeg", "png"):
+            return
 
-        if XMP_NS_XMP not in xmp:
-            meta = {}
-        else:
-            meta = {key: value for key, value, options in xmp[XMP_NS_XMP]}
-        print(meta)
-        # if self.file_ext not in ("jpg", "jpeg"):
-        #     return
+        xmpfile = XMPFiles(file_path=str(file_path), open_forupdate=True)
+        xmp = xmpfile.get_xmp()
+        if not xmp:
+            # TODO why do some PNG files not return xmp?
+            return
+
+        # xmp:CreateDate
+        # xmp:xmp:ModifyDate
+        try:
+            print("xmp format:", xmp.get_property(XMP_NS_DC, "format"))
+        except XMPError:
+            print("xmp format: no format")
+
+        if False and xmpfile.can_put_xmp(xmp):
+            xmpfile.put_xmp(xmp)
+            xmpfile.close_file()
 
         # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
