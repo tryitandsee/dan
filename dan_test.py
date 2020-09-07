@@ -146,7 +146,7 @@ def test_post_sync_iptc():
     )
     post = PostFactory(
         file_url="https://example.com/foo.jpg",
-        tag_string=" ".join(factory.Faker("words", nb=80).generate()),
+        tag_string=" ".join(factory.Faker("words", nb=10).generate()),
         tag_string_copyright="iptc_test",
     )
     path, __ = post.download()

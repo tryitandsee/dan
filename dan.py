@@ -177,10 +177,8 @@ class Post:
             # TODO why do some PNG files not return xmp?
             return
 
-        # Existing meta
-        xmpdict = libxmp.utils.object_to_dict(xmp)
-        if xmpdict:
-            print("existing", xmpdict)
+        # Existing meta, this isn't very useful on it's own
+        # xmpdict = libxmp.utils.object_to_dict(xmp)
 
         # xmp:CreateDate
         # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -188,8 +186,13 @@ class Post:
         # dc:format xmp.get_property(XMP_NS_DC, "format"
 
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
+        existing_keywords = []
         try:
-            existing_keywords = xmp.get_property(XMP_NS_DC, "subject")
+            xmp.get_property(XMP_NS_DC, "subject")
+            n = xmp.count_array_items(XMP_NS_DC, "subject")
+            for idx in range(1, n + 1):
+                existing_keywords.append(xmp.get_array_item(XMP_NS_DC, "subject", idx))
+            print("EHHHH", (existing_keywords), "HHHHEEEE")
         except libxmp.XMPError:
             existing_keywords = []
         post_keywords = self.tag_string.split(" ")
