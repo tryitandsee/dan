@@ -176,11 +176,16 @@ class Post:
             return
 
         # xmp:CreateDate
-        # xmp:xmp:ModifyDate
+        # xmp:ModifyDate
+        # dc:format xmp.get_property(XMP_NS_DC, "format"
+
+        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
         try:
-            print("xmp format:", xmp.get_property(XMP_NS_DC, "format"))
+            keywords = xmp.get_property(XMP_NS_DC, "subject")
         except XMPError:
-            print("xmp format: no format")
+            keywords = []
+        print(keywords)
+        # xmp.append_array_item(consts.XMP_NS_DC, 'subject', 'Your Name Here', {'prop_array_is_ordered': True, 'prop_value_is_array': True})
 
         if False and xmpfile.can_put_xmp(xmp):
             xmpfile.put_xmp(xmp)
