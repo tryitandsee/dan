@@ -82,28 +82,28 @@ class Post:
     @property
     def artists(self) -> List[str]:
         if self.tag_string_artist:
-            return safe(self.tag_string_artist).split(" ")
+            return self.tag_string_artist.split(" ")
 
         return []
 
     @property
     def characters(self) -> List[str]:
         if self.tag_string_character:
-            return safe(self.tag_string_character).split(" ")
+            return self.tag_string_character.split(" ")
 
         return []
 
     @property
     def copyright(self) -> List[str]:
         if self.tag_string_copyright:
-            return safe(self.tag_string_copyright).split(" ")
+            return self.tag_string_copyright.split(" ")
 
         return []
 
     def get_name(self, artists: List[str], characters: List[str]) -> str:
         """Generate a possible filename to fix MAX_FILENAME"""
-        artists_str = " ".join(artists)
-        characters_str = " ".join(characters)
+        artists_str = safe(" ".join(artists))
+        characters_str = safe(" ".join(characters))
 
         if artists_str and characters_str:
             return f"{characters_str} - {artists_str} ID[{self.id}].{self.file_ext}"
@@ -126,11 +126,11 @@ class Post:
         series = None
         if self.copyright:
             for series in reversed(self.copyright):
-                if (DOWNLOAD_DIR / series).is_dir():
+                if (DOWNLOAD_DIR / safe(series)).is_dir():
                     break
 
         if series:
-            base_dir = base_dir / series
+            base_dir = base_dir / safe(series)
 
         artists_src = self.artists.copy()
         characters_src = self.characters.copy()
