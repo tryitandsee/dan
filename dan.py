@@ -12,8 +12,10 @@ from pprint import pprint
 from typing import List, Literal, Tuple, Union
 from urllib.parse import urlparse
 
+import libxmp
+import libxmp.utils
 import requests
-from iptcinfo3 import IPTCInfo
+from libxmp.consts import XMP_NS_DC, XMP_NS_XMP
 
 MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
@@ -33,6 +35,28 @@ parser.add_argument(
 def safe(s: str) -> str:
     """Adjust text make safe filenames"""
     return s.replace("/", "_").replace("!", "")
+
+
+def add_array_xmp(xmp, key: str, items: List[str]) -> None:
+    """
+    Mutate xmp to add items to an array (Bag Text) to DC (Dublin Core) metadata field
+    """
+    existing_items = []
+    try:
+        xmp.get_property(XMP_NS_DC, key)
+        n = xmp.count_array_items(XMP_NS_DC, key)
+        for idx in range(1, n + 1):
+            existing_items.append(xmp.get_array_item(XMP_NS_DC, key, idx))
+    except libxmp.XMPError:
+        pass
+    for item in items:
+        if item not in existing_items:
+            xmp.append_array_item(
+                libxmp.consts.XMP_NS_DC,
+                key,
+                item,
+                {"prop_array_is_ordered": True, "prop_value_is_array": True},
+            )
 
 
 @dataclass
@@ -79,28 +103,28 @@ class Post:
     @property
     def artists(self) -> List[str]:
         if self.tag_string_artist:
-            return safe(self.tag_string_artist).split(" ")
+            return self.tag_string_artist.split(" ")
 
         return []
 
     @property
     def characters(self) -> List[str]:
         if self.tag_string_character:
-            return safe(self.tag_string_character).split(" ")
+            return self.tag_string_character.split(" ")
 
         return []
 
     @property
     def copyright(self) -> List[str]:
         if self.tag_string_copyright:
-            return safe(self.tag_string_copyright).split(" ")
+            return self.tag_string_copyright.split(" ")
 
         return []
 
     def get_name(self, artists: List[str], characters: List[str]) -> str:
         """Generate a possible filename to fix MAX_FILENAME"""
-        artists_str = " ".join(artists)
-        characters_str = " ".join(characters)
+        artists_str = safe(" ".join(artists))
+        characters_str = safe(" ".join(characters))
 
         if artists_str and characters_str:
             return f"{characters_str} - {artists_str} ID[{self.id}].{self.file_ext}"
@@ -123,11 +147,11 @@ class Post:
         series = None
         if self.copyright:
             for series in reversed(self.copyright):
-                if (DOWNLOAD_DIR / series).is_dir():
+                if (DOWNLOAD_DIR / safe(series)).is_dir():
                     break
 
         if series:
-            base_dir = base_dir / series
+            base_dir = base_dir / safe(series)
 
         artists_src = self.artists.copy()
         characters_src = self.characters.copy()
@@ -158,6 +182,60 @@ class Post:
 
         return files[0]
 
+    def sync_iptc(self, file_path: Path) -> None:
+        """
+        Sync metadata to file.
+
+        Take in a file path because there's no guarantee file is at
+        self.get_file_save_path()
+
+        Note to future self: it doesn't matter if you put a namespace in the
+        name like "xmp:CreateDate" vs "CreateDate" or "dc:creator" vs "creator"
+        """
+        if self.file_ext not in ("jpg", "jpeg", "png"):
+            return
+
+        xmpfile = libxmp.XMPFiles(file_path=str(file_path), open_forupdate=True)
+        xmp = xmpfile.get_xmp()
+        if not xmp:
+            # TODO why do some PNG files not return xmp?
+            return
+
+        # Existing meta, this isn't very useful on it's own
+        # xmpdict = libxmp.utils.object_to_dict(xmp)
+
+        # Set simple metadata fields
+        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#date-created
+        try:
+            xmp.get_property(XMP_NS_XMP, "CreateDate")
+        except libxmp.XMPError:
+            xmp.set_property(XMP_NS_XMP, "CreateDate", self.created_at)
+
+        try:
+            xmp.get_property(XMP_NS_XMP, "ModifyDate")
+        except libxmp.XMPError:
+            xmp.set_property(XMP_NS_XMP, "ModifyDate", self.updated_at)
+
+        try:
+            xmp.get_property(XMP_NS_XMP, "Rating")
+        except libxmp.XMPError:
+            # If we bookmarked it, we must like it, so set a default of "4"
+            xmp.set_property(XMP_NS_XMP, "Rating", "4")
+
+        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
+        add_array_xmp(xmp, "creator", self.artists)
+
+        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
+        add_array_xmp(
+            xmp,
+            "subject",
+            self.copyright + self.characters + self.tag_string_general.split(" "),
+        )
+
+        if xmpfile.can_put_xmp(xmp):
+            xmpfile.put_xmp(xmp)
+        xmpfile.close_file()
+
     def download(self) -> Tuple[Path, bool]:
         """
         Returns
@@ -170,6 +248,7 @@ class Post:
         if existing_file:
             if file_save_path != existing_file:
                 existing_file.rename(file_save_path)
+            self.sync_iptc(file_save_path)
             created_at = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
             created_at_sec = time.mktime(created_at.utctimetuple()) + utc_offset
             updated_at = dt.datetime.strptime(self.updated_at, "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -178,25 +257,9 @@ class Post:
             return file_save_path, False
 
         res = requests.get(self.file_url)
-        if self.file_ext == "jpgTODO":
-            f = BytesIO(res.content)
-            info = IPTCInfo(f, force=True, inp_charset="utf_8")
-            keywords = []
-            info["date-created"] = self.created_at
-            if len(self.artists) == 1:
-                # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
-                info["By-line"] = self.artists[0]
-            else:
-                keywords.extend(self.artists)
-            # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
-            print(info)
-            # TODO strip keywords already in info['keywords']
-            info["keywords"].append(keywords)
-            # info.save_as("hmm.jpg")
-        # TODO if file exists: update tags or skip
         with open(file_save_path, "wb") as fh:
             fh.write(res.content)
-
+        self.sync_iptc(file_save_path)
         created_at = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
         created_at_sec = time.mktime(created_at.utctimetuple()) + utc_offset
         updated_at = dt.datetime.strptime(self.updated_at, "%Y-%m-%dT%H:%M:%S.%f%z")

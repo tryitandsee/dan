@@ -135,3 +135,23 @@ def test_post_download_handles_slash_in_name():
     post.download()
 
     assert (dan.DOWNLOAD_DIR / "a_b").exists()
+
+
+@responses.activate
+def test_post_sync_iptc():
+    responses.add(
+        responses.GET,
+        "https://example.com/foo.jpg",
+        open("./fixtures/horse.jpg", "rb").read(),
+    )
+    post = PostFactory(
+        file_url="https://example.com/foo.jpg",
+        tag_string_copyright="iptc_test",
+        tag_string_artist="michelangelo raphael",
+        tag_string_character="bebop rocksteady",
+        tag_string_general=" ".join(factory.Faker("words", nb=10).generate()),
+    )
+    path, __ = post.download()
+
+    post.sync_iptc(path)
+    post.sync_iptc(path)
