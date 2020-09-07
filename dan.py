@@ -12,6 +12,8 @@ from pprint import pprint
 from typing import List, Literal, Tuple, Union
 from urllib.parse import urlparse
 
+import libxmp
+import libxmp.utils
 import requests
 from libxmp.consts import XMP_NS_DC
 from libxmp import XMPError, XMPFiles
@@ -175,28 +177,34 @@ class Post:
             # TODO why do some PNG files not return xmp?
             return
 
+        # Existing meta
+        xmpdict = libxmp.utils.object_to_dict(xmp)
+        if xmpdict:
+            print("existing", xmpdict)
+
         # xmp:CreateDate
+        # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
         # xmp:ModifyDate
         # dc:format xmp.get_property(XMP_NS_DC, "format"
 
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
         try:
-            keywords = xmp.get_property(XMP_NS_DC, "subject")
-        except XMPError:
-            keywords = []
-        print(keywords)
-        # xmp.append_array_item(consts.XMP_NS_DC, 'subject', 'Your Name Here', {'prop_array_is_ordered': True, 'prop_value_is_array': True})
+            existing_keywords = xmp.get_property(XMP_NS_DC, "subject")
+        except libxmp.XMPError:
+            existing_keywords = []
+        post_keywords = self.tag_string.split(" ")
+        print(post_keywords)
+        for keyword in post_keywords:
+            xmp.append_array_item(
+                libxmp.consts.XMP_NS_DC,
+                "subject",
+                keyword,
+                {"prop_array_is_ordered": True, "prop_value_is_array": True},
+            )
 
-        if False and xmpfile.can_put_xmp(xmp):
+        if xmpfile.can_put_xmp(xmp):
             xmpfile.put_xmp(xmp)
-            xmpfile.close_file()
-
-        # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
-        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
-        # TODO strip keywords already in info['keywords']
-        # info["keywords"].append(keywords)
-        # info.save_as("hmm.jpg")
-        # TODO if file exists: update tags or skip
+        xmpfile.close_file()
 
     def download(self) -> Tuple[Path, bool]:
         """
