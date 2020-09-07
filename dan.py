@@ -205,7 +205,7 @@ class Post:
         # xmp:CreateDate
         # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
         # xmp:ModifyDate
-        # dc:format xmp.get_property(XMP_NS_DC, "format"
+        # dc:format xmp.get_property(XMP_NS_DC, "format")
 
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
         add_array_xmp(xmp, "creator", self.artists)
