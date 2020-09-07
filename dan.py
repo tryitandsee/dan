@@ -207,6 +207,9 @@ class Post:
         # xmp:ModifyDate
         # dc:format xmp.get_property(XMP_NS_DC, "format"
 
+        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
+        add_array_xmp(xmp, "creator", self.artists)
+
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
         add_array_xmp(
             xmp,
