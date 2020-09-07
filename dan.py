@@ -15,8 +15,7 @@ from urllib.parse import urlparse
 import libxmp
 import libxmp.utils
 import requests
-from libxmp.consts import XMP_NS_DC
-from libxmp import XMPError, XMPFiles
+from libxmp.consts import XMP_NS_DC, XMP_NS_XMP
 
 MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
@@ -193,7 +192,7 @@ class Post:
         if self.file_ext not in ("jpg", "jpeg", "png"):
             return
 
-        xmpfile = XMPFiles(file_path=str(file_path), open_forupdate=True)
+        xmpfile = libxmp.XMPFiles(file_path=str(file_path), open_forupdate=True)
         xmp = xmpfile.get_xmp()
         if not xmp:
             # TODO why do some PNG files not return xmp?
@@ -202,10 +201,23 @@ class Post:
         # Existing meta, this isn't very useful on it's own
         # xmpdict = libxmp.utils.object_to_dict(xmp)
 
-        # xmp:CreateDate
-        # info["date-created"] = dt.datetime.strptime(self.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
-        # xmp:ModifyDate
-        # dc:format xmp.get_property(XMP_NS_DC, "format")
+        # Set simple metadata fields
+        # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#date-created
+        try:
+            xmp.get_property(XMP_NS_XMP, "CreateDate")
+        except libxmp.XMPError:
+            xmp.set_property(XMP_NS_XMP, "CreateDate", self.created_at)
+
+        try:
+            xmp.get_property(XMP_NS_XMP, "ModifyDate")
+        except libxmp.XMPError:
+            xmp.set_property(XMP_NS_XMP, "ModifyDate", self.updated_at)
+
+        try:
+            xmp.get_property(XMP_NS_XMP, "Rating")
+        except libxmp.XMPError:
+            # If we bookmarked it, we must like it, so set a default of "4"
+            xmp.set_property(XMP_NS_XMP, "Rating", "4")
 
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#creator
         add_array_xmp(xmp, "creator", self.artists)
