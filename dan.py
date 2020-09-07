@@ -187,23 +187,22 @@ class Post:
 
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
         existing_keywords = []
+        post_keywords = self.tag_string.split(" ")
         try:
             xmp.get_property(XMP_NS_DC, "subject")
             n = xmp.count_array_items(XMP_NS_DC, "subject")
             for idx in range(1, n + 1):
                 existing_keywords.append(xmp.get_array_item(XMP_NS_DC, "subject", idx))
-            print("EHHHH", (existing_keywords), "HHHHEEEE")
         except libxmp.XMPError:
-            existing_keywords = []
-        post_keywords = self.tag_string.split(" ")
-        print(post_keywords)
+            pass
         for keyword in post_keywords:
-            xmp.append_array_item(
-                libxmp.consts.XMP_NS_DC,
-                "subject",
-                keyword,
-                {"prop_array_is_ordered": True, "prop_value_is_array": True},
-            )
+            if keyword not in existing_keywords:
+                xmp.append_array_item(
+                    libxmp.consts.XMP_NS_DC,
+                    "subject",
+                    keyword,
+                    {"prop_array_is_ordered": True, "prop_value_is_array": True},
+                )
 
         if xmpfile.can_put_xmp(xmp):
             xmpfile.put_xmp(xmp)

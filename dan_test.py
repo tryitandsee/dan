@@ -152,3 +152,4 @@ def test_post_sync_iptc():
     path, __ = post.download()
 
     post.sync_iptc(path)
+    post.sync_iptc(path)
