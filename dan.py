@@ -188,6 +188,9 @@ class Post:
 
         Take in a file path because there's no guarantee file is at
         self.get_file_save_path()
+
+        Note to future self: it doesn't matter if you put a namespace in the
+        name like "xmp:CreateDate" vs "CreateDate" or "dc:creator" vs "creator"
         """
         if self.file_ext not in ("jpg", "jpeg", "png"):
             return
