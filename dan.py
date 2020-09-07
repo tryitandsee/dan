@@ -187,7 +187,9 @@ class Post:
 
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
         existing_keywords = []
-        post_keywords = self.tag_string.split(" ")
+        post_keywords = (
+            self.copyright + self.characters + self.tag_string_general.split(" ")
+        )
         try:
             xmp.get_property(XMP_NS_DC, "subject")
             n = xmp.count_array_items(XMP_NS_DC, "subject")
