@@ -38,6 +38,28 @@ def safe(s: str) -> str:
     return s.replace("/", "_").replace("!", "")
 
 
+def add_array_xmp(xmp, key: str, items: List[str]) -> None:
+    """
+    Mutate xmp to add items to an array (Bag Text) to DC (Dublin Core) metadata field
+    """
+    existing_items = []
+    try:
+        xmp.get_property(XMP_NS_DC, key)
+        n = xmp.count_array_items(XMP_NS_DC, key)
+        for idx in range(1, n + 1):
+            existing_items.append(xmp.get_array_item(XMP_NS_DC, key, idx))
+    except libxmp.XMPError:
+        pass
+    for item in items:
+        if item not in existing_items:
+            xmp.append_array_item(
+                libxmp.consts.XMP_NS_DC,
+                key,
+                item,
+                {"prop_array_is_ordered": True, "prop_value_is_array": True},
+            )
+
+
 @dataclass
 class Post:
     id: int
@@ -186,25 +208,11 @@ class Post:
         # dc:format xmp.get_property(XMP_NS_DC, "format"
 
         # https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#keywords
-        existing_keywords = []
-        post_keywords = (
-            self.copyright + self.characters + self.tag_string_general.split(" ")
+        add_array_xmp(
+            xmp,
+            "subject",
+            self.copyright + self.characters + self.tag_string_general.split(" "),
         )
-        try:
-            xmp.get_property(XMP_NS_DC, "subject")
-            n = xmp.count_array_items(XMP_NS_DC, "subject")
-            for idx in range(1, n + 1):
-                existing_keywords.append(xmp.get_array_item(XMP_NS_DC, "subject", idx))
-        except libxmp.XMPError:
-            pass
-        for keyword in post_keywords:
-            if keyword not in existing_keywords:
-                xmp.append_array_item(
-                    libxmp.consts.XMP_NS_DC,
-                    "subject",
-                    keyword,
-                    {"prop_array_is_ordered": True, "prop_value_is_array": True},
-                )
 
         if xmpfile.can_put_xmp(xmp):
             xmpfile.put_xmp(xmp)
