@@ -3,6 +3,7 @@ import argparse
 import datetime as dt
 import os
 import dataclasses
+import re
 import time
 from dataclasses import dataclass
 from glob import glob
@@ -31,10 +32,13 @@ parser.add_argument(
     help="Stop pagination when we see a post again",
 )
 
+unsafe_chars_to_strip = re.compile(r"[!?:<]+")
+
 
 def safe(s: str) -> str:
     """Adjust text make safe filenames"""
-    return s.replace("/", "_").replace("!", "")
+    s = s.replace("/", "_")
+    return unsafe_chars_to_strip.sub("", s)
 
 
 def add_array_xmp(xmp, key: str, items: List[str]) -> None:
