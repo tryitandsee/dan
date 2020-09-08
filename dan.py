@@ -20,6 +20,8 @@ from libxmp.consts import XMP_NS_DC, XMP_NS_XMP
 
 MAX_FILENAME = 100
 DOWNLOAD_DIR = Path("./download")
+# Tags that aren't useful to save locally
+BANNED_TAGS = ("banned_artist",)
 
 utc_offset = time.localtime().tm_gmtoff
 parser = argparse.ArgumentParser(description="Download booru")
@@ -107,21 +109,27 @@ class Post:
     @property
     def artists(self) -> List[str]:
         if self.tag_string_artist:
-            return self.tag_string_artist.split(" ")
+            return [
+                x for x in self.tag_string_artist.split(" ") if x not in BANNED_TAGS
+            ]
 
         return []
 
     @property
     def characters(self) -> List[str]:
         if self.tag_string_character:
-            return self.tag_string_character.split(" ")
+            return [
+                x for x in self.tag_string_character.split(" ") if x not in BANNED_TAGS
+            ]
 
         return []
 
     @property
     def copyright(self) -> List[str]:
         if self.tag_string_copyright:
-            return self.tag_string_copyright.split(" ")
+            return [
+                x for x in self.tag_string_copyright.split(" ") if x not in BANNED_TAGS
+            ]
 
         return []
 
