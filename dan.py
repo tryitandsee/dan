@@ -40,7 +40,7 @@ unsafe_chars_to_strip = re.compile(r"[!?:<]+")
 def safe(s: str) -> str:
     """Adjust text make safe filenames"""
     s = s.replace("/", "_")
-    return unsafe_chars_to_strip.sub("", s)
+    return unsafe_chars_to_strip.sub("", s).rstrip(".")
 
 
 def add_array_xmp(xmp, key: str, items: List[str]) -> None:
