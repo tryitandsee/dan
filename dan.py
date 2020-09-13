@@ -248,8 +248,14 @@ class Post:
             xmpfile.put_xmp(xmp)
         xmpfile.close_file()
 
-    def download(self) -> Tuple[Path, bool]:
+    def download(self, update_only: bool = False) -> Tuple[Path, bool]:
         """
+        Parameters
+        ----------
+        update_only
+            To support fast updates, the moment we hit a duplicate, stop
+            downloading, but keep updating existing files if they exist
+
         Returns
         -------
           file_path, created
@@ -268,6 +274,9 @@ class Post:
             os.utime(file_save_path, times=(created_at_sec, updated_at_sec))
             return file_save_path, False
 
+        if update_only:
+            return file_save_path, False
+
         res = requests.get(self.file_url)
         with open(file_save_path, "wb") as fh:
             fh.write(res.content)
@@ -281,6 +290,7 @@ class Post:
 
 
 def get_posts(page_number=1) -> List[Post]:
+    """Get a page of posts"""
     url = os.getenv("BOORU_URL")
     assert url
     url_bits = urlparse(url)
@@ -306,7 +316,7 @@ if __name__ == "__main__":
     while True:
         posts = get_posts(page_number)
         for post in posts:
-            local_path, created = post.download()
+            local_path, created = post.download(update_only=post_seen_again)
             if created:
                 time.sleep(2)
             else:
